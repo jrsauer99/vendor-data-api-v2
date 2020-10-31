@@ -1,3 +1,5 @@
+import os
+
 from pyspark.sql.functions import *
 from pyspark.sql import Row
 from pyspark.sql.types import *
@@ -17,14 +19,15 @@ kinesis = spark \
         .option('streamName', stream_name) \
         .option('endpointUrl', 'https://kinesis.us-east-1.amazonaws.com')\
         .option('region', 'us-east-1') \
-        .option('awsAccessKeyId', os.environ['AWS_ACCESS_KEY_ID'])\
-        .option('awsSecretKey', os.environ['AWS_SECRET_ACCESS_KEY']) \
         .option('startingposition', 'TRIM_HORIZON')\
         .load()\
 
 schema = StructType([
-            StructField("message_type", StringType()),
-            StructField("count", IntegerType())])
+            StructField("user", StringType()),
+            StructField("address", StringType()),
+            StructField("time", TimestampType()),
+            StructField("item", StringType()),
+            StructField("price", FloatType())])
 kinesis\
     .selectExpr('CAST(data AS STRING)')\
     .select(from_json('data', schema).alias('data'))\
